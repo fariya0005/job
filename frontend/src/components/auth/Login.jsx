@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { RadioGroup } from '../ui/radio-group';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -15,7 +14,6 @@ const Login = () => {
     const [input, setInput] = useState({
         email: "",
         password: "",
-        role: "",
     });
     const { loading, user } = useSelector(store => store.auth);
     const navigate = useNavigate();
@@ -83,34 +81,6 @@ const Login = () => {
                             placeholder="********"
                             className="mt-2 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         />
-                    </div>
-
-                    <div className="my-4">
-                        <Label className="block text-sm font-semibold text-gray-700 mb-2">Select Role</Label>
-                        <RadioGroup className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                                <Input
-                                    type="radio"
-                                    name="role"
-                                    value="student"
-                                    checked={input.role === 'student'}
-                                    onChange={changeEventHandler}
-                                    className="cursor-pointer focus:ring-blue-500 h-4 w-4"
-                                />
-                                <Label htmlFor="r1" className="text-sm text-gray-700">Student</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Input
-                                    type="radio"
-                                    name="role"
-                                    value="admin"
-                                    checked={input.role === 'admin'}
-                                    onChange={changeEventHandler}
-                                    className="cursor-pointer focus:ring-blue-500 h-4 w-4"
-                                />
-                                <Label htmlFor="r2" className="text-sm text-gray-700">Admin</Label>
-                            </div>
-                        </RadioGroup>
                     </div>
 
                     {loading ? (

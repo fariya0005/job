@@ -1,94 +1,64 @@
-// import React, { useEffect } from 'react';
-// import Navbar from '../shared/Navbar';
-// import ApplicantsTable from './ApplicantsTable';
-// import axios from 'axios';
-// import { APPLICATION_API_END_POINT } from '@/utils/constant';
-// import { useParams } from 'react-router-dom';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { setAllApplicants } from '@/redux/applicationSlice';
-
-// const Applicants = () => {
-//     const params = useParams();
-//     const dispatch = useDispatch();
-//     const { applicants } = useSelector(store => store.application);
-
-//     useEffect(() => {
-//         const fetchAllApplicants = async () => {
-//             try {
-//                 const res = await axios.get(`${APPLICATION_API_END_POINT}/${params.id}/applicants`, { withCredentials: true });
-//                 dispatch(setAllApplicants(res.data.job)); // Ensure that `res.data.job` contains the expected structure
-//             } catch (error) {
-//                 console.error("Error fetching applicants:", error.response?.data?.message || error.message);
-//                 // You can also handle showing a toast message here if needed
-//             }
-//         };
-
-//         fetchAllApplicants();
-//     }, [params.id, dispatch]); // Add `params.id` and `dispatch` to the dependency array
-
-//     return (
-//         <div>
-//             <Navbar />
-//             <div className='max-w-7xl mx-auto'>
-//                 <h1 className='font-bold text-xl my-5'>Applicants {applicants?.applications?.length || 0}</h1>
-//                 <ApplicantsTable applicants={applicants?.applications || []} /> {/* Pass applicants to ApplicantsTable */}
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default Applicants;
-
-
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ApplicantsTable from './ApplicantsTable'; // Adjust the path as necessary
+import ApplicantsTable from './ApplicantsTable';
 import axios from 'axios';
-import { useParams } from 'react-router-dom'; // Import useParams to get URL parameters
+import { useParams } from 'react-router-dom';
 import { setAllApplicants } from '@/redux/applicationSlice';
 
 const Applicants = () => {
-    const { id: jobId } = useParams(); // Get the job ID from the URL parameters
+    const { id: jobId } = useParams();
     const dispatch = useDispatch();
-    const applicants = useSelector((state) => state.application.applicants.applications); // Accessing the applications array from Redux
+    const applicants = useSelector((state) => state.application.applicants.applications);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchAllApplicants = async () => {
             try {
-                const APPLICATION_API_END_POINT = `http://localhost:8000/api/v1/application/${jobId}/applicants`; // Use the dynamic job ID
+                setLoading(true);
+                const APPLICATION_API_END_POINT = `http://localhost:8000/api/v1/application/${jobId}/applicants`;
                 const res = await axios.get(APPLICATION_API_END_POINT, { withCredentials: true });
-                console.log('API Response:', res.data); // Log the API response
-                dispatch(setAllApplicants(res.data.applicants || [])); // Ensure this correctly matches the API response structure
+                console.log('API Response:', res.data);
+                dispatch(setAllApplicants(res.data.applicants || []));
+                setError(null);
             } catch (error) {
-                console.error('Error fetching applicants:', error); // Log any errors
+                console.error('Error fetching applicants:', error);
+                setError('Failed to load applicants. Please try again later.');
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchAllApplicants();
-    }, [dispatch, jobId]); // Add jobId to the dependency array
+    }, [dispatch, jobId]);
 
     return (
-        <div>
-            <h1>Applicants List</h1>
-            {applicants && applicants.length > 0 ? (
+        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+            <h2 className="text-2xl font-semibold text-center text-blue-600 mb-6">Applicants List</h2>
+
+            {loading ? (
+                <div className="flex justify-center items-center h-40">
+                    <svg className="animate-spin h-10 w-10 text-blue-600" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+                    </svg>
+                    <span className="ml-4 text-lg text-blue-600">Loading applicants...</span>
+                </div>
+            ) : error ? (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong className="font-bold">Error!</strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            ) : applicants && applicants.length > 0 ? (
                 <ApplicantsTable applicants={applicants} />
             ) : (
-                <div>No applicants found.</div> // Fallback message
+                <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative text-center" role="alert">
+                    <span>No applicants found.</span>
+                </div>
             )}
         </div>
     );
 };
 
 export default Applicants;
-
-
-
-
-
-
-
-
-
-
-

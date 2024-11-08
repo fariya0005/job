@@ -4,66 +4,6 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
-// User registration
-// export const register = async (req, res) => {
-//     try {
-//         const { fullname, email, phoneNumber, password, role } = req.body;
-//         console.log('Incoming Data:', { fullname, email, phoneNumber, password, role });
-
-//         // Check for missing fields
-//         if (!fullname || !email || !phoneNumber || !password || !role) {
-//             console.log('Missing fields detected');
-//             return res.status(400).json({
-//                 message: "Something is missing",
-//                 success: false
-//             });
-//         }
-
-//         const file = req.file; // Retrieve the uploaded file
-//         let profilePhotoUrl = '';
-
-//         Handle file upload to Cloudinary
-//         if (file) {
-//             const dataUri = getDataUri(file);
-//             const cloudResponse = await cloudinary.uploader.upload(dataUri.content);
-//             profilePhotoUrl = cloudResponse.secure_url;
-//             console.log('Uploaded to Cloudinary:', profilePhotoUrl);
-//         }
-
-//         // Check if the user already exists
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             console.log('User already exists');
-//             return res.status(400).json({
-//                 message: 'User already exists with this email.',
-//                 success: false,
-//             });
-//         }
-
-//         // Hash the password
-//         const hashedPassword = await bcrypt.hash(password, 10);
-//         console.log('Hashed Password:', hashedPassword);
-
-//         // Create the new user
-//         await User.create({
-//             fullname,
-//             email,
-//             phoneNumber,
-//             password: hashedPassword,
-//             role,
-            
-//         });
-
-//         return res.status(201).json({
-//             message: "Account created successfully.",
-//             success: true
-//         });
-//     } catch (error) {
-//         console.error('Error during registration:', error); // Log the complete error
-//         return res.status(500).json({ message: 'Internal server error', success: false });
-//     }
-// };
-
 
 
 // User registration
@@ -125,18 +65,24 @@ export const register = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
-// User login
+
+
+
+
+
+
+
 export const login = async (req, res) => {
     try {
-        console.log('Login Request Body:', req.body); // Log the incoming request body
-        
-        const { email, password, role } = req.body;
+        console.log('Login Request Body:', req.body);
+
+        const { email, password } = req.body;
 
         // Check for missing fields
-        if (!email || !password || !role) {
+        if (!email || !password) {
             console.log('Missing fields detected for login');
             return res.status(400).json({
-                message: "Something is missing",
+                message: "Email and password are required",
                 success: false
             });
         }
@@ -161,18 +107,19 @@ export const login = async (req, res) => {
             });
         }
 
-        // Check if the role is correct
-        if (role !== user.role) {
-            console.log('Role mismatch');
-            return res.status(400).json({
-                message: "Account doesn't exist with the current role.",
-                success: false
-            });
-        }
-
         // Generate JWT token
         const tokenData = { userId: user._id };
         const token = jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: '1d' });
+
+        // Determine the redirect URL based on user's role
+        let redirectURL;
+        if (user.role === 'student') {
+            redirectURL = '/student-dashboard';
+        } else if (user.role === 'admin') {
+            redirectURL = '/admin-dashboard';
+        } else {
+            redirectURL = '/';
+        }
 
         // Prepare user data for response
         const userData = {
@@ -184,19 +131,21 @@ export const login = async (req, res) => {
             profile: user.profile
         };
 
-        // Send response with token and user data
+        // Send response with token, user data, and redirect URL
         return res.status(200)
             .cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict' })
             .json({
                 message: `Welcome back ${user.fullname}`,
                 user: userData,
+                redirectURL, // Send redirect URL in response
                 success: true
             });
     } catch (error) {
-        console.error('Error during login:', error); // Log the error details
+        console.error('Error during login:', error);
         return res.status(500).json({ message: 'Internal server error', success: false });
     }
 };
+
 
 // User logout
 export const logout = async (req, res) => {
