@@ -39,6 +39,7 @@ const Navbar = () => {
       <li onClick={() => navigate('/')} className="hover:text-green-600 cursor-pointer transition duration-300">Home</li>
       <li onClick={() => navigate('/career-tools')} className="hover:text-green-600 cursor-pointer transition duration-300">Career Tools</li>
       <li onClick={() => navigate('/jobs')} className="hover:text-green-600 cursor-pointer transition duration-300">Jobs</li>
+      <li onClick={() => navigate('/recommendations')} className="hover:text-green-600 cursor-pointer transition duration-300">Recommendations</li>
     </>
   ), []);
 

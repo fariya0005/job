@@ -28,6 +28,7 @@ import MockInterview from './components/MockInterview';
 import ResumeFeedback from './components/ResumeFeedback';
 import PlacementRecords from './components/PlacementRecords';
 import AlumniNetwork from './components/AlumniNetwork'; // Import Alumni Network component
+import Recommendation from './components/Recommendation';
 
 // Define your app routes
 const appRouter = createBrowserRouter([
@@ -42,6 +43,10 @@ const appRouter = createBrowserRouter([
   {
     path: '/signup',
     element: <Signup />,
+  },
+  {
+    path: "/recommendations", // Add this route
+    element: <Recommendation /> // Add the Recommendation component
   },
   {
     path: "/jobs",
